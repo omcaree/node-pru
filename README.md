@@ -1,5 +1,5 @@
 Access the Programmable Realtime Units (PRUs) of the BeagleBone from Node.js
-============================================================================
+----------------------------------------------------------------------------
 
 This module allows you to interface your Node.js code with programs executing on the BeagleBones Programmable Realtime Units (PRUs). The BeagleBone has 2 PRUs which are separate to the main CPU and run at 200MHz with access to 16 GPIOs each. The benefits of executing code on the PRU are guaranteed realtime execution (outside of the OS) with no load on the primary CPU. The PRUs are coded in (TIs own assembly instruction set)[http://processors.wiki.ti.com/index.php/PRU_Assembly_Instructions] and can communicate with code running within the OS via interrupts and shared memory space. 
 
