@@ -1,0 +1,28 @@
+{
+  "name": "pru",
+  "version": "0.1.0",
+  "description": "Access the Programmable Reatime Units (PRUs) of the BeagleBone",
+  "main": "build/Release/pru",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install": "node-gyp rebuild"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/omcaree/node-pru.git"
+  },
+  "keywords": [
+    "beaglebone",
+    "pru"
+  ],
+  "author": "Owen McAree",
+  "license": "BSD",
+  "gypfile": true,
+  "readmeFilename": "README.md",
+  "bugs": {
+    "url": "https://github.com/omcaree/node-pru/issues"
+  }
+}
