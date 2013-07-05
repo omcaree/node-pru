@@ -125,6 +125,7 @@ Your system is now set up to use the PRU, now we can start using Node.JS
 Installation
 ------------
 To install the module simply type
+
 	npm install pru
 	
 Usage
@@ -133,6 +134,7 @@ Usage
 A simple example is given in the examples folder, *timing_test.js* and *timing_test.p*. The example simply loops the PRU very quickly and prints the status of the countdown every second.
 
 First assemble the PRU code
+
 	pasm -b timing_test.p
 	
 Then run the example
