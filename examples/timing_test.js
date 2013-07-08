@@ -16,6 +16,9 @@ pru.waitForInterrupt(function() {
 	
 	// Stop the counter
 	clearInterval(counter);
+	
+	//Clear the interrupt to let the PRU continue
+	pru.clearInterrupt();
 });
 
 // Start the PRU code

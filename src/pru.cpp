@@ -210,7 +210,6 @@ struct Baton {
 void AsyncWork(uv_work_t* req) {
 //    Baton* baton = static_cast<Baton*>(req->data);
 	prussdrv_pru_wait_event(PRU_EVTOUT_0);
-	prussdrv_pru_clear_event(PRU0_ARM_INTERRUPT);
 }
 
 void AsyncAfter(uv_work_t* req, int status) {
@@ -235,6 +234,12 @@ Handle<Value> waitForInterrupt(const Arguments& args) {
 
 /*---------------------------Here ends the copy/pasting----------------------------*/
 
+/* Clear Interrupt */
+Handle<Value> clearInterrupt(const Arguments& args) {
+	HandleScope scope;
+	prussdrv_pru_clear_event(PRU0_ARM_INTERRUPT);
+	return scope.Close(Undefined());
+};
 
 /* Force the PRU code to terminate */
 Handle<Value> forceExit(const Arguments& args) {
@@ -266,6 +271,9 @@ void Init(Handle<Object> exports, Handle<Object> module) {
 	
 	//	pru.waitForInterrupt(function() { console.log("Interrupted by PRU");});
 	exports->Set(String::NewSymbol("waitForInterrupt"), FunctionTemplate::New(waitForInterrupt)->GetFunction());
+
+	//	pru.clearInterrupt();
+	exports->Set(String::NewSymbol("clearInterrupt"), FunctionTemplate::New(clearInterrupt)->GetFunction());	
 	
 	//	pru.exit();
 	exports->Set(String::NewSymbol("exit"), FunctionTemplate::New(forceExit)->GetFunction());
