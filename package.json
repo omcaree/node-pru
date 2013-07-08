@@ -1,6 +1,6 @@
 {
   "name": "pru",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Access the Programmable Reatime Units (PRUs) of the BeagleBone",
   "main": "build/Release/pru",
   "directories": {
