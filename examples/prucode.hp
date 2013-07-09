@@ -13,6 +13,7 @@
 #define ARM_PRU0_INTERRUPT      21
 #define ARM_PRU1_INTERRUPT      22
 
+#define CONST_PRUSSINTC		 C0
 #define CONST_PRUCFG         C4
 #define CONST_PRUDRAM        C24
 #define CONST_PRUSHAREDRAM   C28
@@ -27,7 +28,16 @@
 // Address for the Constant table Programmable Pointer Register 1(CTPPR_1)
 #define CTPPR_1         0x2202C
 
+#define SECR2_OFFSET    0x284
+#define ECR2_OFFSET      0x384
+
 // Macros
+
+.macro  MOV32               
+.mparam dst, src
+    MOV     dst.w0, src & 0xFFFF
+    MOV     dst.w2, src >> 16
+.endm
 
 .macro  LD32
 .mparam dst,src
