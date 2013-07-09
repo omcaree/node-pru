@@ -241,6 +241,13 @@ Handle<Value> clearInterrupt(const Arguments& args) {
 	return scope.Close(Undefined());
 };
 
+Handle<Value> interruptPRU(const Arguments& args) {
+	HandleScope scope;
+	prussdrv_pru_send_event(ARM_PRU0_INTERRUPT);
+	return scope.Close(Undefined());
+};
+
+
 /* Force the PRU code to terminate */
 Handle<Value> forceExit(const Arguments& args) {
 	HandleScope scope;
@@ -273,7 +280,10 @@ void Init(Handle<Object> exports, Handle<Object> module) {
 	exports->Set(String::NewSymbol("waitForInterrupt"), FunctionTemplate::New(waitForInterrupt)->GetFunction());
 
 	//	pru.clearInterrupt();
-	exports->Set(String::NewSymbol("clearInterrupt"), FunctionTemplate::New(clearInterrupt)->GetFunction());	
+	exports->Set(String::NewSymbol("clearInterrupt"), FunctionTemplate::New(clearInterrupt)->GetFunction());
+	
+	//	pru.interrupt();
+	exports->Set(String::NewSymbol("interrupt"), FunctionTemplate::New(interruptPRU)->GetFunction());	
 	
 	//	pru.exit();
 	exports->Set(String::NewSymbol("exit"), FunctionTemplate::New(forceExit)->GetFunction());
