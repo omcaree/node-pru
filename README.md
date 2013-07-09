@@ -176,6 +176,10 @@ Set a callback to fire when the PRU generates an interupt
 		console.log("Interrupted by PRU");
 		});
 		
+Interrupt PRU
+
+	pru.interrupt();
+		
 Terminate the PRU execution
 
 	pru.exit();
@@ -184,5 +188,4 @@ Limitations
 -----------
 * Currently only PRU0 is supported
 * Only the Shared Memory space can be used for communication
-* There is no support (yet) for node.js to interrupt the PRU
 * The Shared Memory getters/setters are limited to integers
