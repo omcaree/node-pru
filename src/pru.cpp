@@ -228,7 +228,7 @@ Handle<Value> waitForInterrupt(const Arguments& args) {
     baton->request.data = baton;
     baton->callback = Persistent<Function>::New(callback);
 	
-	uv_queue_work(uv_default_loop(), &baton->request, AsyncWork, AsyncAfter);
+	uv_queue_work(uv_default_loop(), &baton->request, AsyncWork, (uv_after_work_cb)AsyncAfter);
 	return scope.Close(Undefined());
 }
 
@@ -257,7 +257,7 @@ Handle<Value> forceExit(const Arguments& args) {
 };
 
 /* Initialise the module */
-void Init(Handle<Object> exports, Handle<Object> module) {
+void Init(Handle<Object> exports) {
 	//	pru.init();
 	exports->Set(String::NewSymbol("init"), FunctionTemplate::New(InitPRU)->GetFunction());
 	
