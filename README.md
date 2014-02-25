@@ -19,16 +19,41 @@ And to avoid the need to do this in the future (the drivers tend to seg fault if
 ### Device Tree ###
 The most difficult part of setting up the PRUs on the BBB involves setting up the device tree. The instructions [here](http://www.element14.com/community/community/knode/single-board_computers/next-gen_beaglebone/blog/2013/05/22/bbb--working-with-the-pru-icssprussv2) are pretty easy to follow. What follows is what I did to enable PRU0 and set pins 25, 27, 28, 29, 30 and 31 of the P9 expansion header to outputs. I did not use the device tree overlay approach as I am simply building a custom image, the approach I used is quicker but less portable.
 
+Install the device-tree-compiler. Use Robert C. Nelson Script
+
+    wget -c https://raw.github.com/RobertCNelson/tools/master/pkgs/dtc.sh
+    chmod +x dtc.sh
+    ./dtc.sh
+
+There are two was of setting up the device tree, Overlay or Recomplie the full tree.
+
+## Overlay ##
+Two overlay files are included in the example folder. Run as root
+
+    examples/enable_pru_input.sh
+    or
+    examples/enable_pru_output.sh
+
+PRU0 will be enabled and the pinmuxing set. No reboot required.
+PRU output requires HDMI to be disabled.
+
+To remove an overlay find overlay number.
+
+    sudo cat /sys/devices/bone_capemgr*/slots |grep PRU
+
+Remove that overlay number
+
+    echo {overlay number} > /sys/devices/bone_capemgr*/slots
+
+### OR ###
+
+## Recompile ##
 Firstly, get hold of the sourcecode for the BBB device tree (details [here](http://blog.pignology.net/2013/05/getting-uart2-devttyo1-working-on.html))
 
 	wget http://pignology.net/blackdts.tgz
 	tar xvzf blackdts.tgz
 	cd blackdts
-	
-Now install the device-tree-compiler. On Ubuntu, do this with
 
-	sudo apt-get install device-tree-compiler
-	
 Next, open up *am335x-bone-common.dtsi*. In the section named *am33xx_pinmux: pinmux@44e10800* add the following to set the pinmuxing
 
 	pruicss_pins: pinmux_pruicss_pins {
@@ -66,12 +91,6 @@ Get the driver and assembler code
 
 	git clone https://github.com/beagleboard/am335x_pru_package.git
 	cd am335x_pru_package
-	
-Apply the following patch to prevent interrupts being fired twice by the driver
-
-	wget http://e2e.ti.com/cfs-file.ashx/__key/telligent-evolution-components-attachments/00-791-00-00-00-23-97-35/attachments.tar.gz
-	tar -xzf attachments.tar.gz
-	patch -p1 <  0001-Fix-for-duplicated-interrupts-when-interrupts-are-se.patch 
 
 Compile the driver as a shared library (don't use *make*, this builds a static library which node-gyp does not like!)
 

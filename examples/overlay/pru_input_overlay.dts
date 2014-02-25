@@ -1,0 +1,41 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+    compatible = "ti,beaglebone", "ti,beaglebone-black";
+
+	/* identification */
+	part-number = "PRU-PARALLEL";
+
+	/* version */
+	version = "00A0";
+
+	fragment@0 {
+		target = <&am33xx_pinmux>;
+		__overlay__ {
+			pruicss_pins: pinmux_pruicss_pins {
+				pinctrl-single,pins = <
+					0x190 0x26 // PRU0 R31[0]
+					0x194 0x26 // PRU0 R31[1]
+					0x198 0x26 // PRU0 R31[2]
+					0x19C 0x26 // PRU0 R31[3]
+					0x1A0 0x26 // PRU0 R31[4]
+					0x1A4 0x26 // PRU0 R31[5]
+					0x1A8 0x26 // PRU0 R31[6]
+					0x1AC 0x26 // PRU0 R31[7]
+					0x038 0x26 // PRU0 R31[14]
+					0x1B4 0x25 // PRU0 R31[16]
+				>;
+			};
+		};
+	};
+
+	fragment@2 {
+		target = <&pruss>;
+		__overlay__{
+			status = "okay";
+			pinctrl-names = "default";
+			pinctrl-0 = <&pruicss_pins>;
+		};
+	};
+};

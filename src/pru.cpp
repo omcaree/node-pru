@@ -237,7 +237,7 @@ Handle<Value> waitForInterrupt(const Arguments& args) {
 /* Clear Interrupt */
 Handle<Value> clearInterrupt(const Arguments& args) {
 	HandleScope scope;
-	prussdrv_pru_clear_event(PRU0_ARM_INTERRUPT);
+	prussdrv_pru_clear_event(PRU_EVTOUT_0, PRU0_ARM_INTERRUPT);
 	return scope.Close(Undefined());
 };
 
