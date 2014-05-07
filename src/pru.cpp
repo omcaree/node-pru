@@ -39,7 +39,7 @@ Handle<Value> InitPRU(const Arguments& args) {
 	//Open interrupt
 	unsigned int ret = prussdrv_open(PRU_EVTOUT_0);
 	if (ret) {
-		ThrowException(Exception::Error(String::New("open_failed")));
+		ThrowException(Exception::Error(String::New("Could not open PRU driver. Did you forget to load device tree fragment?")));
 		return scope.Close(Undefined());
 	}
 	
