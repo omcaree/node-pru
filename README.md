@@ -61,28 +61,11 @@ Finally, backup your old binary and replace it with the one you just compiled
 
 After a reboot, PRU0 will be enabled and the pinmuxing set.
 
-### Driver library and assembler ###
+### Installing PRU ssembler ###
 Get the driver and assembler code
 
 	git clone https://github.com/beagleboard/am335x_pru_package.git
 	cd am335x_pru_package
-	
-Apply the following patch to prevent interrupts being fired twice by the driver
-
-	wget http://e2e.ti.com/cfs-file.ashx/__key/telligent-evolution-components-attachments/00-791-00-00-00-23-97-35/attachments.tar.gz
-	tar -xzf attachments.tar.gz
-	patch -p1 <  0001-Fix-for-duplicated-interrupts-when-interrupts-are-se.patch 
-
-Compile the driver as a shared library (don't use *make*, this builds a static library which node-gyp does not like!)
-
-	cd pru_sw/app_loader/interface/
-	gcc -I. -Wall -I../include   -c -fPIC -O3 -mtune=cortex-a8 -march=armv7-a -shared -o prussdrv.o prussdrv.c
-	gcc -shared -o libprussdrv.so prussdrv.o
-
-Copy the driver and headers to system folders
-
-	sudo cp libprussdrv.so /usr/lib/
-	sudo cp ../include/*.h /usr/include/
 	
 Now build the assember
 
@@ -92,33 +75,6 @@ Now build the assember
 Copy the assembler to system
 
 	sudo cp ../pasm /usr/bin/
-
-Finally, test the PRU system with one of the examples.
-
-	cd ../../example_apps/PRU_memAccess_DDR_PRUsharedRAM
-
-Assemble the PRU code
-
-	pasm -b PRU_memAccess_DDR_PRUsharedRAM.p
-
-This will generate the PRU binary *PRU_memAccess_DDR_PRUsharedRAM.bin*. Now compile the C code
-
-	gcc PRU_memAccess_DDR_PRUsharedRAM.c -lprussdrv -lpthread -otest
-
-Run the example (must run as root to access the PRU)
-
-	sudo ./test
-	
-If all goes well you should see the following
-
-	INFO: Starting PRU_memAccess_DDR_PRUsharedRAM example.
-	AM33XX
-			INFO: Initializing example.
-			INFO: Executing example.
-	File ./PRU_memAccess_DDR_PRUsharedRAM.bin open passed
-			INFO: Waiting for HALT command.
-			INFO: PRU completed transfer.
-	Example executed succesfully.
 
 Your system is now set up to use the PRU, now we can start using Node.JS
 
