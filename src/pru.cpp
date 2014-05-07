@@ -212,7 +212,7 @@ void AsyncWork(uv_work_t* req) {
 	prussdrv_pru_wait_event(PRU_EVTOUT_0);
 }
 
-void AsyncAfter(uv_work_t* req, int status) {
+void AsyncAfter(uv_work_t* req) {
     HandleScope scope;
     Baton* baton = static_cast<Baton*>(req->data);
 	baton->callback->Call(Context::GetCurrent()->Global(), 0, 0);
@@ -237,7 +237,23 @@ Handle<Value> waitForInterrupt(const Arguments& args) {
 /* Clear Interrupt */
 Handle<Value> clearInterrupt(const Arguments& args) {
 	HandleScope scope;
-	prussdrv_pru_clear_event(PRU0_ARM_INTERRUPT);
+	
+	//Check we have single argument
+	if (args.Length() != 1) {
+		ThrowException(Exception::TypeError(String::New("Wrong number of arguments")));
+		return scope.Close(Undefined());
+	}
+	
+	//Check it's a number
+	if (!args[0]->IsNumber()) {
+		ThrowException(Exception::TypeError(String::New("Argument must be Integer")));
+		return scope.Close(Undefined());
+	}
+	
+	//Get index value
+	int event = (int) Array::Cast(*args[0])->NumberValue();
+	
+	prussdrv_pru_clear_event(PRU0_ARM_INTERRUPT, event);
 	return scope.Close(Undefined());
 };
 
