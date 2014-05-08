@@ -1,28 +1,26 @@
 {
-  "name": "pru",
-  "version": "0.1.4",
+  "name": "prussdrv",
+  "version": "0.0.2",
   "description": "Access the Programmable Reatime Units (PRUs) of the BeagleBone",
-  "main": "build/Release/pru",
-  "directories": {
-    "example": "examples"
-  },
+  "main": "prussdrv.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "install": "node-gyp rebuild"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/omcaree/node-pru.git"
+    "url": "https://github.com/pgmmpk/node-prussdrv.git"
   },
   "keywords": [
     "beaglebone",
-    "pru"
+    "pru",
+    "prussdrv"
   ],
-  "author": "Owen McAree",
-  "license": "BSD",
+  "author": "Mike Kroutikov",
+  "license": "MIT",
   "gypfile": true,
   "readmeFilename": "README.md",
   "bugs": {
-    "url": "https://github.com/omcaree/node-pru/issues"
+    "url": "https://github.com/pgmmpk/node-prussdrv/issues"
   }
 }
