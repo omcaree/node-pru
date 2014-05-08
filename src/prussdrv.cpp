@@ -371,4 +371,4 @@ void Init(Handle<Object> exports, Handle<Object> module) {
 	exports->Set(String::NewSymbol("exit"), FunctionTemplate::New(forceExit)->GetFunction());
 }
 
-NODE_MODULE(pru, Init)
+NODE_MODULE(prussdrv, Init)
