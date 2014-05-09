@@ -2,7 +2,7 @@
   "name": "prussdrv",
   "version": "0.0.2",
   "description": "Access the Programmable Reatime Units (PRUs) of the BeagleBone",
-  "main": "prussdrv.js",
+  "main": "build/Release/prussdrv",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "install": "node-gyp rebuild"
