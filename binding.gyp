@@ -1,9 +1,9 @@
 {
 	"targets": [
 		{
-			"target_name": "pru",
+			"target_name": "prussdrv",
 			"sources": [
-				"src/pru.cpp",
+				"src/prussdrv.cpp",
 				"prussdrv/prussdrv.c",
 			],
 			"include_dirs": [
