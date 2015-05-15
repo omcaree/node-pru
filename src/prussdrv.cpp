@@ -23,6 +23,9 @@ using namespace v8;
 //shared memory pointer
 static unsigned int* sharedMem_int;
 
+//data memory pointer
+static unsigned int* dataMem_int;
+
 /* Initialise the PRU
  *	Initialise the PRU driver and static memory
  *	Takes no arguments and returns nothing
@@ -36,7 +39,7 @@ Handle<Value> InitPRU(const Arguments& args) {
 	//Open interrupt
 	unsigned int ret = prussdrv_open(PRU_EVTOUT_0);
 	if (ret) {
-		printf("prussdrv_open open failed\n");
+		ThrowException(Exception::Error(String::New("Could not open PRU driver. Did you forget to load device tree fragment?")));
 		return scope.Close(Undefined());
 	}
 	
@@ -45,9 +48,9 @@ Handle<Value> InitPRU(const Arguments& args) {
 	prussdrv_pruintc_init(&pruss_intc_initdata);
 	
 	// Allocate shared PRU memory
-	static void *sharedMem;
-    prussdrv_map_prumem(PRUSS0_SHARED_DATARAM, &sharedMem);
-    sharedMem_int = (unsigned int*) sharedMem;
+    	prussdrv_map_prumem(PRUSS0_SHARED_DATARAM, (void **) &sharedMem_int);
+
+	prussdrv_map_prumem(PRUSS0_PRU0_DATARAM, (void **) &dataMem_int);
 	
 	//Return nothing
 	return scope.Close(Undefined());
@@ -76,7 +79,11 @@ Handle<Value> executeProgram(const Arguments& args) {
 	std::string programS = std::string(*program);
 	
 	//Execute the program
-	prussdrv_exec_program (PRU_NUM, (char*)programS.c_str());
+	int rc = prussdrv_exec_program (PRU_NUM, (char*)programS.c_str());
+	if (rc != 0) {
+		ThrowException(Exception::TypeError(String::New("failed to execute PRU firmware")));
+		return scope.Close(Undefined());
+	}
 	
 	//Return nothing
 	return scope.Close(Undefined());
@@ -152,6 +159,35 @@ Handle<Value> setSharedRAMInt(const Arguments& args) {	//array
 	return scope.Close(Undefined());
 };
 
+/* Set a single integer value in PRU0 data RAM
+ * 	Takes two integer arguments, index and value.
+ */
+Handle<Value> setDataRAMInt(const Arguments& args) {
+	HandleScope scope;
+
+	if (args.Length() != 2) {
+		ThrowException(Exception::TypeError(String::New("Wrong number of arguments")));
+		return scope.Close(Undefined());
+	}
+	
+	//Check they are both numbers
+	if (!args[0]->IsNumber() || !args[1]->IsNumber()) {
+		ThrowException(Exception::TypeError(String::New("Arguments must be Integer")));
+		return scope.Close(Undefined());
+	}
+
+	//Get the numbers
+	unsigned short index = (unsigned short)Array::Cast(*args[0])->NumberValue();
+	unsigned int val = (unsigned int)Array::Cast(*args[1])->NumberValue();
+	
+	//Set the memory date
+	dataMem_int[index] = val;
+	
+	//Return nothing
+	return scope.Close(Undefined());
+}
+	
+
 /* Get array from shared memory
  *	Returns first 16 integers from shared memory
  *	TODO: should take start and size integers as input to let user select array size
@@ -170,6 +206,7 @@ Handle<Value> getSharedRAM(const Arguments& args) {	//array
 	//Return array
 	return scope.Close(a);
 };
+
 
 /* Get single integer from shared memory
  *	Takes integer index argument, returns array at that index
@@ -196,6 +233,29 @@ Handle<Value> getSharedRAMInt(const Arguments& args) {	//array
 	return scope.Close(Number::New(sharedMem_int[OFFSET_SHAREDRAM + index]));
 };
 
+/* Get single integer from data memory
+ *	Takes integer index argument, returns value at that index
+ */
+Handle<Value> getDataRAMInt(const Arguments& args) {	//array
+	HandleScope scope;
+	
+	//Check we have single argument
+	if (args.Length() != 1) {
+		ThrowException(Exception::TypeError(String::New("Wrong number of arguments")));
+		return scope.Close(Undefined());
+	}
+	
+	//Check it's a number
+	if (!args[0]->IsNumber()) {
+		ThrowException(Exception::TypeError(String::New("Argument must be Integer")));
+		return scope.Close(Undefined());
+	}
+	
+	//Get index value
+	unsigned short index = (unsigned short)Array::Cast(*args[0])->NumberValue();
+	//Return memory
+	return scope.Close(Number::New(dataMem_int[index]));
+}
 
 /*-------------------This is mostly copy/pasted from here: ---------------------*/
 /*----------------http://kkaefer.github.io/node-cpp-modules/--------------------*/
@@ -212,7 +272,7 @@ void AsyncWork(uv_work_t* req) {
 	prussdrv_pru_wait_event(PRU_EVTOUT_0);
 }
 
-void AsyncAfter(uv_work_t* req, int status) {
+void AsyncAfter(uv_work_t* req) {
     HandleScope scope;
     Baton* baton = static_cast<Baton*>(req->data);
 	baton->callback->Call(Context::GetCurrent()->Global(), 0, 0);
@@ -237,7 +297,23 @@ Handle<Value> waitForInterrupt(const Arguments& args) {
 /* Clear Interrupt */
 Handle<Value> clearInterrupt(const Arguments& args) {
 	HandleScope scope;
-	prussdrv_pru_clear_event(PRU0_ARM_INTERRUPT);
+	
+	//Check we have single argument
+	if (args.Length() != 1) {
+		ThrowException(Exception::TypeError(String::New("Wrong number of arguments")));
+		return scope.Close(Undefined());
+	}
+	
+	//Check it's a number
+	if (!args[0]->IsNumber()) {
+		ThrowException(Exception::TypeError(String::New("Argument must be Integer")));
+		return scope.Close(Undefined());
+	}
+	
+	//Get index value
+	int event = (int) Array::Cast(*args[0])->NumberValue();
+	
+	prussdrv_pru_clear_event(PRU0_ARM_INTERRUPT, event);
 	return scope.Close(Undefined());
 };
 
@@ -275,6 +351,12 @@ void Init(Handle<Object> exports, Handle<Object> module) {
 	
 	//	var intVal = pru.getSharedRAM(3);
 	exports->Set(String::NewSymbol("getSharedRAMInt"), FunctionTemplate::New(getSharedRAMInt)->GetFunction());
+
+	//	var intVal = pru.getDataRAM(3);
+	exports->Set(String::NewSymbol("getDataRAMInt"), FunctionTemplate::New(getDataRAMInt)->GetFunction());
+
+	//	pru.setDataRAMInt(4, 0xff);
+	exports->Set(String::NewSymbol("setDataRAMInt"), FunctionTemplate::New(setDataRAMInt)->GetFunction());
 	
 	//	pru.waitForInterrupt(function() { console.log("Interrupted by PRU");});
 	exports->Set(String::NewSymbol("waitForInterrupt"), FunctionTemplate::New(waitForInterrupt)->GetFunction());
@@ -289,4 +371,4 @@ void Init(Handle<Object> exports, Handle<Object> module) {
 	exports->Set(String::NewSymbol("exit"), FunctionTemplate::New(forceExit)->GetFunction());
 }
 
-NODE_MODULE(pru, Init)
+NODE_MODULE(prussdrv, Init)
